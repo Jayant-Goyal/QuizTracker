@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quiz Tracker</title>
+  <!-- Google Fonts (Montserrat, Roboto Mono, Poppins) -->
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Roboto+Mono:wght@400;700&family=Poppins:wght@400;700&display=swap"
+  />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <!-- Materialize CSS (for icons) -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+  />
+  <!-- External CSS File -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="quiz-tracker" id="quizTracker">
+    <!-- HEADER (Title + Timer + Tiles) -->
+    <div class="header">
+      <div class="title">Quiz Tracker</div>
+      <div class="header-right">
+        <div class="timer" id="timer">
+          <span id="hr">00</span>
+          <span id="min">:00</span>
+          <span id="sec">:00</span>
+        </div>
+        <!-- VALUE TILES -->
+        <div class="value-tiles">
+          <div class="value-tile correct" id="correctValueTile">+5</div>
+          <div class="value-tile incorrect" id="incorrectValueTile">-1</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="results" id="results">
+      <!-- Quiz results (table form) will be displayed here -->
+    </div>
+
+    <!-- Four large answer buttons (including Undo) -->
+    <div class="answer-buttons" id="inputbuttons">
+      <button class="answer-btn correct" id="crtbtn" onclick="updateCorrectAnswers()">
+        Correct Answer
+      </button>
+      <button class="answer-btn incorrect" id="icrtbtn" onclick="updateIncorrectAnswers()">
+        Incorrect Answer
+      </button>
+      <button class="answer-btn not-attempted" id="natmbtn" onclick="updateNotAttempted()">
+        Not Attempted
+      </button>
+      <!-- NEW: Undo Button (Rectangular) -->
+      <button class="answer-btn undo" id="undoButton">
+        <i class="material-icons">undo</i> Undo
+      </button>
+    </div>
+
+    <!-- Control panel buttons (Undo removed from here) -->
+    <div class="control-panel" id="controlPanel">
+      <button class="control-btn" id="answerMenuButton">
+        <i class="material-icons">menu</i>
+      </button>
+      <button class="control-btn" id="fullScreen">
+        <i class="material-icons">fullscreen</i>
+      </button>
+      <button class="control-btn" id="historyButton">
+        <i class="material-icons">history</i>
+      </button>
+      <button class="control-btn" id="resetButton">
+        <i class="material-icons">refresh</i>
+      </button>
+      <button class="control-btn" id="settingsButton">
+        <i class="material-icons">settings</i>
+      </button>
+      <!-- Dark Mode Toggle (optional) -->
+      <button class="control-btn" id="themeToggle">
+        <i class="material-icons">brightness_6</i>
+      </button>
+    </div>
+
+    <!-- "Answer Canal" container (STARTS HIDDEN) -->
+    <div id="ansCanal" class="hidden">
+      <div id="answerMenu">
+        <!-- We dynamically insert a limited # of circles in #answerCircles -->
+        <div id="answerCircles"></div>
+        <!-- The "View All" button pinned to the right -->
+        <button class="answer-btn view-all-btn" id="viewAllButton">View All</button>
+      </div>
+    </div>
+
+    <!-- Full Answer Menu Modal (STARTS HIDDEN) -->
+    <div id="fullAnswerMenu" class="hidden">
+      <div id="fullAnswerContent"></div>
+      <button id="closeFullAnswer">Close</button>
+    </div>
+
+    <!-- Settings Modal (STARTS HIDDEN) -->
+    <div id="settingsMenu" class="hidden">
+      <label>Value of each correct answer:</label>
+      <input type="number" id="correctAnsBox" />
+      <label>Value of each incorrect answer:</label>
+      <input type="number" id="incorrectAnsBox" />
+      <label>Sound:</label>
+      <input type="checkbox" id="soundToggle" />
+      <button id="saveSettings">Save</button>
+    </div>
+
+    <!-- Value Change Modal (STARTS HIDDEN) -->
+    <div id="valueChangeModal" class="hidden">
+      <label id="valueChangeLabel" for="valueChangeInput"></label>
+      <input type="number" id="valueChangeInput" />
+      <div class="modal-buttons">
+        <button id="saveValueChange">Save</button>
+        <button id="cancelValueChange">Cancel</button>
+      </div>
+    </div>
+
+    <!-- History Modal (STARTS HIDDEN) -->
+    <div id="historyMenu" class="hidden">
+      <div class="historyModalHeader">
+        <h2>Quiz History</h2>
+        <button id="closeHistory">Close</button>
+      </div>
+      <div class="historyTableWrapper">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Quiz #</th>
+              <th>Date/Time</th>
+              <th>Attempted</th>
+              <th>Not Attempted</th>
+              <th>Correct</th>
+              <th>Incorrect</th>
+              <th>Total Marks</th>
+              <th>Max Marks</th>
+              <th>%</th>
+              <th>Nonnegative %</th>
+            </tr>
+          </thead>
+          <tbody id="historyTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- External JavaScript File -->
+  <script src="quizTracker.js"></script>
+</body>
+</html>
