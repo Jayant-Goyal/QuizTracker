@@ -6,6 +6,41 @@
   --accent-green: #82cd37;
   --accent-red: hsl(0, 94%, 64%);
   --accent-yellow: #f7da36;
+
+  /* Checkbox border color in light mode */
+  --checkbox-border: #999;
+}
+
+/* Dark mode overrides */
+body.dark-mode {
+  --background: #181a1b;
+  --shadow-light: #2a2e31;
+  --shadow-dark: #101214;
+  --text-color: #d3d3d3;
+  --accent-green: #60ba49;
+  --accent-red: #e74c3c;
+  --accent-yellow: #f1c40f;
+
+  /* White border for checkboxes in dark mode */
+  --checkbox-border: #fff;
+}
+
+/* Ensure html/body fill the screen so .quiz-tracker is centered */
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: "Montserrat", sans-serif;
+  background: var(--background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
 }
 
 /* Optional: Themed scrollbar for light mode */
@@ -29,24 +64,10 @@
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  font-family: "Montserrat", sans-serif;
-  background: var(--background);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-}
-
 /* Hide default spinner in Firefox */
 input[type=number] {
   -moz-appearance: textfield;
 }
-/* 
-   Chrome/Safari/Edge: bigger, clearer double-arrow icon
-*/
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -55,7 +76,7 @@ input[type=number]::-webkit-outer-spin-button {
     no-repeat center;
   background-size: 0.8em 0.8em;
   box-shadow: inset 1px 1px 2px var(--shadow-dark),
-              inset -1px -1px 2px var(--shadow-light);
+              inset -1px -1px 2px #ffffffa8;
   width: 1.4em;
   height: 1.4em;
   margin: 0;
@@ -107,6 +128,7 @@ input[type=number]::-webkit-outer-spin-button {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 /* TIMER BASE STYLE */
@@ -130,19 +152,12 @@ input[type=number]::-webkit-outer-spin-button {
   color: var(--text-color);
 }
 
-/* In dark mode, if timer not started => white text */
-body.dark-mode .timer:not(.running):not(.paused) {
-  color: #fff;
-}
-
-/* Timer running => force black text */
 .timer.running {
   background-color: var(--accent-green);
   color: #000;
   box-shadow: 0 0 12px rgba(130,205,55,0.6);
 }
 
-/* Timer paused => force black text */
 .timer.paused {
   background-color: var(--accent-yellow);
   color: #000;
@@ -255,6 +270,12 @@ button {
   transition: transform 0.1s ease-in-out;
 }
 
+.answer-btn:focus,
+.answer-btn:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 .answer-btn:active {
   transform: scale(0.96);
   box-shadow:
@@ -262,34 +283,32 @@ button {
     inset -2px -2px 4px #ffffffa8;
 }
 
-.answer-btn:focus {
-  outline: none !important;
-}
-
-/* Color-coded backgrounds for the first 3 big buttons */
 .answer-btn.correct {
   background-color: var(--accent-green);
+  color: #000 !important;
 }
 
 .answer-btn.incorrect {
   background-color: var(--accent-red);
+  color: #000 !important;
 }
 
 .answer-btn.not-attempted {
   background-color: var(--accent-yellow);
+  color: #000 !important;
 }
 
 /* NEW: Undo button => not round, neutral style */
 .answer-btn.undo {
-  border-radius: 10px; /* rectangular corners */
-  background-color: var(--background); /* neutral color */
+  border-radius: 10px;
+  background-color: var(--background);
   display: inline-flex;
   align-items: center;
   gap: 6px;
   justify-content: center;
 }
 
-/* Control panel row (Undo removed) */
+/* Control panel row */
 .control-panel {
   display: flex;
   justify-content: space-around;
@@ -341,7 +360,6 @@ button {
   gap: 0.5rem;
 }
 
-/* 3D style for circles in the canal */
 #answerCircles div {
   width: 30px;
   height: 30px;
@@ -353,10 +371,9 @@ button {
   color: #fff;
   box-shadow: 0.2rem 0.2rem 0.2rem rgba(0,0,0,0.39),
               -0.2rem -0.2rem 0.2rem rgba(255,255,255,0.65);
-  text-shadow: 0.07rem 0.07rem 0.1rem rgba(0,0,0,0.7);
+  text-shadow: 0.05rem 0.05rem 0.12rem rgba(0,0,0,0.7);
 }
 
-/* "View All" button pinned to the right */
 .answer-btn.view-all-btn {
   flex: 0 0 auto !important;
   min-width: auto !important;
@@ -369,7 +386,7 @@ button {
   white-space: nowrap;
 }
 
-/* Full Answer Menu Modal */
+/* Full Answer Menu Panel */
 #fullAnswerMenu {
   position: fixed;
   top: 50%;
@@ -380,7 +397,7 @@ button {
   border-radius: 20px;
   box-shadow: 8px 8px 16px var(--shadow-dark),
               -8px -8px 16px var(--shadow-light);
-  z-index: 1000;
+  z-index: 1100;
   max-height: 80vh;
   overflow-y: auto;
 }
@@ -396,7 +413,7 @@ button {
   color: #fff;
   box-shadow: 0.2rem 0.2rem 0.2rem rgba(0,0,0,0.39),
               -0.2rem -0.2rem 0.2rem rgba(255,255,255,0.65);
-  text-shadow: 0.07rem 0.07rem 0.1rem rgba(0,0,0,0.7);
+  text-shadow: 0.05rem 0.05rem 0.12rem rgba(0,0,0,0.7);
 }
 
 #fullAnswerMenu button {
@@ -411,6 +428,8 @@ button {
   font-size: 1rem;
   font-weight: 600;
   font-family: "Poppins", sans-serif;
+  outline: none;
+  border: none;
 }
 
 /* Settings Modal */
@@ -457,6 +476,7 @@ button {
   font-size: 1rem;
   font-weight: 600;
   font-family: "Poppins", sans-serif;
+  outline: none;
 }
 
 /* Value Change Modal */
@@ -508,6 +528,55 @@ button {
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
+  outline: none;
+}
+
+/* The "Resume Quiz" floating modal (no overlay) */
+#resumeQuizModal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1200;
+  background: var(--background);
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 20px 30px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+#resumeQuizModal h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+#resumeQuizModal p {
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+.resume-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.resume-buttons button {
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: none;
+  background: var(--background);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-color);
+  outline: none;
 }
 
 /* HISTORY MODAL */
@@ -530,11 +599,16 @@ button {
 }
 
 .historyModalHeader {
-  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 20px;
+}
+
+.history-header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .historyTableWrapper {
@@ -555,36 +629,102 @@ button {
               inset -1px -1px 2px var(--shadow-light);
 }
 
-#closeHistory {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 30px;
-  background: var(--background);
-  box-shadow: 4px 4px 8px var(--shadow-dark),
-              -4px -4px 8px var(--shadow-light);
+/* Ensuring no border/outline for "Close" & "View Answers" buttons */
+#closeHistory,
+.history-view-btn {
+  border: none !important;
+  outline: none !important;
+}
+
+/* "Close" button => match the "View Answers" style */
+#closeHistory,
+.history-view-btn {
+  padding: 6px 12px;
+  border-radius: 20px;
+  background-color: var(--background);
+  box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  font-family: "Poppins", sans-serif;
-  margin-left: 1rem;
+  transition: transform 0.1s ease-in-out;
+}
+#closeHistory:active,
+.history-view-btn:active {
+  transform: scale(0.96);
+}
+
+/* NEW: Custom checkbox styling, 
+   container: 24×24, shape: 36×36, rotated 45° */
+.content {
+  display: inline-block;
+}
+.checkBox {
+  display: block;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  border: 3px solid transparent;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px var(--checkbox-border);
+}
+.checkBox div {
+  width: 48px;
+  height: 48px;
+  background-color: var(--accent-green);
+  top: -40px;
+  left: -40px;
+  position: absolute;
+  transform: rotateZ(45deg);
+  transition: 300ms ease;
+  z-index: 0;
+}
+.checkBox input[type=checkbox]:checked + div {
+  top: -9px;
+  left: -9px;
+}
+.checkBox input[type=checkbox] {
+  position: static;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* NEW: Delete Selected Button style (circular with trash icon) */
+.history-delete-btn {
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  background-color: var(--background);
+  box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease-in-out;
+}
+.history-delete-btn:active {
+  transform: scale(0.95);
 }
 
 /* Responsive design */
 @media (max-width: 480px) {
   .quiz-tracker {
-    padding: 15px;
+    padding: 12px;
   }
   .answer-btn {
     min-width: 100px;
-    padding: 10px;
-    font-size: 0.9rem;
+    padding: 8px;
+    font-size: 0.8rem;
   }
   .control-btn {
-    width: 40px;
-    height: 40px;
+    width: 33px;
+    height: 33px;
   }
   .results-table {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
   }
   .header {
     justify-content: center;
@@ -610,38 +750,38 @@ button {
   }
 }
 
+/* Extra tweaks for very small screens */
+@media (max-width: 320px) {
+  .quiz-tracker {
+    padding: 10px;
+  }
+  .answer-btn {
+    min-width: 80px;
+    padding: 8px;
+    font-size: 0.65rem;
+  }
+  .control-btn {
+    width: 35px;
+    height: 35px;
+  }
+  .timer {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+  .title {
+    font-size: 1.3rem;
+  }
+}
+
 /* Global override for button focus on non-answer buttons */
 button:focus:not(.answer-btn) {
   outline: none !important;
   background-color: unset !important;
 }
 
-/* Ensure answer buttons keep their designated background colors when focused */
-.answer-btn.correct:focus {
-  background-color: var(--accent-green) !important;
-}
-.answer-btn.incorrect:focus {
-  background-color: var(--accent-red) !important;
-}
-.answer-btn.not-attempted:focus {
-  background-color: var(--accent-yellow) !important;
-}
-
 /* ==============================
    DARK MODE OVERRIDES
    ============================== */
-body.dark-mode {
-  --background: #181a1b;
-  --shadow-light: #2a2e31;
-  --shadow-dark: #101214;
-  --text-color: #d3d3d3;
-  --accent-green: #60ba49;
-  --accent-red: #e74c3c;
-  --accent-yellow: #f1c40f;
-  background: var(--background);
-  color: var(--text-color);
-}
-
 body.dark-mode .results-table tr:nth-child(even),
 body.dark-mode #historyMenu table tr:nth-child(even) {
   background-color: rgba(255, 255, 255, 0.07);
@@ -663,12 +803,12 @@ body.dark-mode #ansCanal {
 
 body.dark-mode #answerCircles div,
 body.dark-mode #fullAnswerContent div {
-  box-shadow: 3px 3px 6px var(--shadow-dark),
-              -3px -3px 6px rgba(255,255,255,0.07);
-  text-shadow: none;
+  box-shadow: 0.2rem 0.2rem 0.2rem rgba(0,0,0,0.8),
+              -0.2rem -0.2rem 0.7rem rgba(255,255,255,0.2);
+  text-shadow: 0.05rem 0.05rem 0.12rem rgba(0,0,0,0.7);
 }
 
-/* Force black text on answer buttons & canal circles */
+/* Force black text on answer buttons & canal circles in normal (light) mode */
 .answer-btn.correct,
 .answer-btn.incorrect,
 .answer-btn.not-attempted {
@@ -679,11 +819,12 @@ body.dark-mode #fullAnswerContent div {
   color: #000 !important;
 }
 
-/* Make text in modals follow var(--text-color) so it remains visible in dark mode */
+/* Make text in modals/panels follow var(--text-color) so it remains visible in dark mode */
 #valueChangeModal,
 #settingsMenu,
 #fullAnswerMenu,
-#historyMenu {
+#historyMenu,
+#resumeQuizModal {
   color: var(--text-color) !important;
 }
 #valueChangeModal input,
@@ -693,11 +834,11 @@ body.dark-mode #fullAnswerContent div {
 #valueChangeModal button,
 #settingsMenu button,
 #fullAnswerMenu button,
-#historyMenu button {
+#historyMenu button,
+#resumeQuizModal button {
   color: var(--text-color) !important;
 }
 
-/* Dark Mode scrollbar */
 body.dark-mode ::-webkit-scrollbar,
 body.dark-mode ::-webkit-scrollbar-track,
 body.dark-mode ::-webkit-scrollbar-corner {
@@ -705,5 +846,197 @@ body.dark-mode ::-webkit-scrollbar-corner {
 }
 body.dark-mode ::-webkit-scrollbar-thumb {
   background: var(--shadow-light);
-  box-shadow: inset 2px 2px 4px var(--shadow-dark);
 }
+
+/* ==============================
+   SHAREABLE SECTION OVERRIDES
+   ============================== */
+#shareableSection {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  width: 100%;
+  max-width: 700px;
+  margin: 20px auto;
+  padding: 20px;
+  background: var(--background);
+  overflow: visible;
+}
+
+/* Only remove the corner rounding/shadow from .header and .results,
+   but NOT from .value-tile */
+#shareableSection .header,
+#shareableSection .results {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ==============================
+   SHARE MODAL OVERRIDES
+   ============================== */
+#shareModal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1300;
+  background: var(--background);
+  border-radius: 20px;
+  box-shadow: 6px 6px 12px var(--shadow-dark),
+              -6px -6px 12px var(--shadow-light);
+  padding: 20px;
+  width: 90%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.shareModalContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+#sharePreview {
+  max-width: 70%;
+  display: block;
+  margin: 0 auto;
+  border-radius: 10px;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+}
+
+/* Share Modal Buttons: ensure a single line layout */
+.shareModalButtons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Neumorphic Toggle Switch for share image theme */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 30px;
+  border-radius: 30px;
+  background: var(--background);
+  box-shadow: inset 4px 4px 8px var(--shadow-dark),
+              inset -4px -4px 8px var(--shadow-light);
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: var(--background);
+  box-shadow: 4px 4px 8px var(--shadow-dark),
+              -4px -4px 8px var(--shadow-light);
+  transition: 0.4s;
+}
+
+.switch input:checked + .slider {
+  transform: translateX(30px);
+}
+
+/* Icon Button Styles for Share Modal */
+.icon-btn {
+  background: var(--background);
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 4px 4px 8px var(--shadow-dark),
+              -4px -4px 8px var(--shadow-light);
+}
+
+.closeShareModalBtn {
+  margin-top: 1rem;
+  background: var(--background);
+  border: none;
+  border-radius: 20px;
+  box-shadow: 4px 4px 8px var(--shadow-dark),
+              -4px -4px 8px var(--shadow-light);
+  padding: 10px 20px;
+  font-family: "Poppins", sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+  align-self: flex-end;
+  display: block;
+  margin-left: auto;
+}
+
+body.dark-mode .closeShareModalBtn {
+  color: #fff;
+}
+
+#shareModal .waves-effect {
+  position: relative !important; 
+  overflow: hidden !important;
+  background-color: inherit !important;
+  box-shadow: none !important;
+}
+
+#shareModal .waves-effect.waves-light .waves-ripple {
+  background-color: transparent !important;
+  opacity: 0 !important;
+}
+
+#shareModal .icon-btn:hover,
+#shareModal .icon-btn:focus,
+#shareModal .icon-btn:active {
+  background-color: var(--background) !important;
+  color: var(--text-color) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+#shareModal .icon-btn:active,
+#shareModal .icon-btn:focus {
+  box-shadow: inset 2px 2px 4px var(--shadow-dark),
+              inset -2px -2px 4px var(--shadow-light) !important;
+  transform: scale(0.98);
+  outline: none !important;
+}
+
+/* SHARE IMAGE THEME OVERRIDES */
+#shareableSection.share-dark {
+  --background: #181a1b;
+  --shadow-light: #2a2e31;
+  --shadow-dark: #101214;
+  --text-color: #d3d3d3;
+  --accent-green: #60ba49;
+  --accent-red: #e74c3c;
+  --accent-yellow: #f1c40f;
+  background: var(--background);
+  color: var(--text-color);
+}
+
+#shareableSection.force-light {
+  --background: #e0e5ec;
+  --shadow-light: #ffffff;
+  --shadow-dark: #bec3c9;
+  --text-color: #333;
+  --accent-green: #82cd37;
+  --accent-red: hsl(0, 94%, 64%);
+  --accent-yellow: #f7da36;
+  background: var(--background);
+  color: var(--text-color);
+}
+
+

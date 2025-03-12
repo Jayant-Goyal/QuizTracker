@@ -6,7 +6,6 @@
    let startTime, pausedTime = 0;
    
    function updateStopwatch() {
-     // If running, calculate elapsed from current time; if paused, show the accumulated time.
      let elapsed;
      if (isTimerRunning) {
        elapsed = Date.now() - startTime + pausedTime;
@@ -72,11 +71,73 @@
       ============================== */
    class QuizTracker {
      constructor() {
-       this.questions_attempted = 0;
-       this.questions_not_attempted = 0;
-       this.correct_answers = 0;
-       this.incorrect_answers = 0;
-       this.user_inputs = [];
+       // Check for unsaved session in localStorage
+       const savedSession = localStorage.getItem("currentQuizSession");
+       if (savedSession) {
+         const data = JSON.parse(savedSession);
+         if (data.user_inputs && data.user_inputs.length > 0) {
+           this._pendingSessionData = data;
+           this.questions_attempted = 0;
+           this.questions_not_attempted = 0;
+           this.correct_answers = 0;
+           this.incorrect_answers = 0;
+           this.user_inputs = [];
+   
+           document.getElementById("resumeQuizModal").classList.remove("hidden");
+   
+           document.getElementById("resumeQuizYes").onclick = () => {
+             this.savePendingDataToHistory();
+             this.questions_attempted = data.questions_attempted || 0;
+             this.questions_not_attempted = data.questions_not_attempted || 0;
+             this.correct_answers = data.correct_answers || 0;
+             this.incorrect_answers = data.incorrect_answers || 0;
+             this.user_inputs = data.user_inputs || [];
+             this._pendingSessionData = null;
+             localStorage.removeItem("currentQuizSession");
+             document.getElementById("resumeQuizModal").classList.add("hidden");
+             this.updateDisplay();
+           };
+   
+           document.getElementById("resumeQuizNo").onclick = () => {
+             localStorage.removeItem("currentQuizSession");
+             this._pendingSessionData = null;
+             document.getElementById("resumeQuizModal").classList.add("hidden");
+             this.questions_attempted = 0;
+             this.questions_not_attempted = 0;
+             this.correct_answers = 0;
+             this.incorrect_answers = 0;
+             this.user_inputs = [];
+             this.updateDisplay();
+           };
+   
+           document.getElementById("resumeQuizSave").onclick = () => {
+             this.savePendingDataToHistory();
+             localStorage.removeItem("currentQuizSession");
+             this._pendingSessionData = null;
+             document.getElementById("resumeQuizModal").classList.add("hidden");
+             this.questions_attempted = 0;
+             this.questions_not_attempted = 0;
+             this.correct_answers = 0;
+             this.incorrect_answers = 0;
+             this.user_inputs = [];
+             this.updateDisplay();
+           };
+         } else {
+           localStorage.removeItem("currentQuizSession");
+           this.questions_attempted = 0;
+           this.questions_not_attempted = 0;
+           this.correct_answers = 0;
+           this.incorrect_answers = 0;
+           this.user_inputs = [];
+         }
+       } else {
+         this.questions_attempted = 0;
+         this.questions_not_attempted = 0;
+         this.correct_answers = 0;
+         this.incorrect_answers = 0;
+         this.user_inputs = [];
+       }
+   
        // Load existing history from localStorage
        this.history = JSON.parse(localStorage.getItem("quizHistory")) || [];
        this.correct_answer_value =
@@ -93,6 +154,47 @@
            this.displayFullAnswerMenu();
          });
        }
+     }
+   
+     savePendingDataToHistory() {
+       if (!this._pendingSessionData) return;
+       let data = this._pendingSessionData;
+       const positiveMarks = data.correct_answers * this.correct_answer_value;
+       const negativeMarks = data.incorrect_answers * this.incorrect_answer_value;
+       const totalMarks = positiveMarks + negativeMarks;
+       const maxMarks =
+         (data.questions_attempted + data.questions_not_attempted) *
+         this.correct_answer_value;
+       const percentage = maxMarks ? (totalMarks / maxMarks) * 100 : 0;
+       const nonnegativePercentage = maxMarks ? (positiveMarks / maxMarks) * 100 : 0;
+   
+       const partialHistory = {
+         timestamp: new Date().toISOString(),
+         results: {
+           questions_attempted: data.questions_attempted,
+           questions_not_attempted: data.questions_not_attempted,
+           correct_answers: data.correct_answers,
+           incorrect_answers: data.incorrect_answers,
+           total_marks: totalMarks,
+           max_marks: maxMarks,
+           percentage: percentage,
+           nonnegative_percentage: nonnegativePercentage
+         },
+         answer_order: data.user_inputs
+       };
+       this.history.push(partialHistory);
+       localStorage.setItem("quizHistory", JSON.stringify(this.history));
+     }
+   
+     autoSaveSession() {
+       const sessionData = {
+         questions_attempted: this.questions_attempted,
+         questions_not_attempted: this.questions_not_attempted,
+         correct_answers: this.correct_answers,
+         incorrect_answers: this.incorrect_answers,
+         user_inputs: this.user_inputs
+       };
+       localStorage.setItem("currentQuizSession", JSON.stringify(sessionData));
      }
    
      undo() {
@@ -117,6 +219,7 @@
      updateDisplay() {
        this.displayResults();
        this.updateAnswerMenu();
+       this.autoSaveSession();
      }
    
      updateAnswerMenu() {
@@ -205,12 +308,6 @@
        }
      }
    
-     aFullscreen() {
-       if (!document.fullscreenElement) {
-         this.openFullscreen();
-       }
-     }
-   
      reset() {
        this.history.push({
          timestamp: new Date().toISOString(),
@@ -224,13 +321,17 @@
            percentage: this.calculatePercentage(),
            nonnegative_percentage: this.calculateNonnegativePercentage(),
          },
+         answer_order: [...this.user_inputs]
        });
        localStorage.setItem("quizHistory", JSON.stringify(this.history));
+   
        this.questions_attempted = 0;
        this.questions_not_attempted = 0;
        this.correct_answers = 0;
        this.incorrect_answers = 0;
        this.user_inputs = [];
+   
+       localStorage.removeItem("currentQuizSession");
        this.updateDisplay();
      }
    
@@ -242,11 +343,20 @@
        let tbody = document.getElementById("historyTbody");
        if (!tbody) return;
        tbody.innerHTML = "";
+       // Create table rows with a custom checkbox on the left.
        this.history.forEach((entry, index) => {
          let dateStr = new Date(entry.timestamp).toLocaleString();
          let r = entry.results;
          let row = document.createElement("tr");
          row.innerHTML = `
+           <td>
+             <div class="content">
+               <label class="checkBox">
+                 <input type="checkbox" class="history-select" value="${index}">
+                 <div class="transition"></div>
+               </label>
+             </div>
+           </td>
            <td>${index + 1}</td>
            <td>${dateStr}</td>
            <td>${r.questions_attempted}</td>
@@ -257,10 +367,59 @@
            <td>${r.max_marks}</td>
            <td>${r.percentage.toFixed(2)}%</td>
            <td>${r.nonnegative_percentage.toFixed(2)}%</td>
+           <td><button class="history-view-btn" onclick="quiz.displayHistoryEntryAnswers(${index})">View Answers</button></td>
          `;
          tbody.appendChild(row);
        });
        document.getElementById("historyMenu").classList.remove("hidden");
+     }
+   
+     deleteSelectedHistoryEntries() {
+       // Gather all selected checkboxes.
+       let selectedCheckboxes = document.querySelectorAll(".history-select:checked");
+       if (selectedCheckboxes.length === 0) {
+         alert("Please select at least one quiz entry to delete.");
+         return;
+       }
+       if (!confirm("Are you sure you want to delete the selected quiz entries?")) {
+         return;
+       }
+       // Extract indices; sort in descending order to avoid index shifting.
+       let indices = Array.from(selectedCheckboxes).map(cb => parseInt(cb.value));
+       indices.sort((a, b) => b - a);
+       indices.forEach(i => {
+         this.history.splice(i, 1);
+       });
+       localStorage.setItem("quizHistory", JSON.stringify(this.history));
+       this.display_history();
+     }
+   
+     displayHistoryEntryAnswers(index) {
+       let entry = this.history[index];
+       let fullMenu = document.getElementById("fullAnswerMenu");
+       let content = document.getElementById("fullAnswerContent");
+       content.innerHTML = "";
+       if (!entry.answer_order || entry.answer_order.length === 0) {
+         content.innerHTML = "No answer history available for this quiz.";
+       } else {
+         entry.answer_order.forEach((answer, i) => {
+           let circle = document.createElement("div");
+           switch (answer) {
+             case "+":
+               circle.style.backgroundColor = "var(--accent-green)";
+               break;
+             case "-":
+               circle.style.backgroundColor = "var(--accent-red)";
+               break;
+             case ".":
+               circle.style.backgroundColor = "var(--accent-yellow)";
+               break;
+           }
+           circle.innerText = i + 1;
+           content.appendChild(circle);
+         });
+       }
+       fullMenu.classList.remove("hidden");
      }
    
      calculatePositiveMarks() {
@@ -373,6 +532,11 @@
    // Create quiz instance
    let quiz = new QuizTracker();
    
+   // Add event listener for "Delete Selected" button in history modal.
+   document.getElementById("deleteSelectedBtn").addEventListener("click", () => {
+     quiz.deleteSelectedHistoryEntries();
+   });
+   
    /* ==============================
       VALUE TILES + MODALS
       ============================== */
@@ -442,12 +606,10 @@
      }
    }
    
-   // Undo button
    document.getElementById("undoButton").addEventListener("click", () => {
      quiz.undo();
    });
    
-   // The "Answer Canal" toggle
    document.getElementById("answerMenuButton").addEventListener("click", () => {
      let canal = document.getElementById("ansCanal");
      canal.classList.toggle("hidden");
@@ -496,7 +658,6 @@
      document.getElementById("historyMenu").classList.add("hidden");
    });
    
-   // Keyboard shortcuts – ignore if focus on input
    window.addEventListener("keydown", function (event) {
      if (event.target.tagName.toLowerCase() === "input") return;
      switch (event.key) {
@@ -513,7 +674,7 @@
    });
    
    /* ==============================
-      DARK MODE TOGGLE (optional)
+      DARK MODE TOGGLE (for whole website)
       ============================== */
    const themeToggleBtn = document.getElementById("themeToggle");
    if (themeToggleBtn) {
@@ -528,6 +689,110 @@
        } else {
          localStorage.setItem("theme", "light");
        }
+       // This toggle does not affect the share image theme.
      });
    }
    
+   /* ==============================
+      SHARE FEATURE IMPLEMENTATION
+      ============================== */
+   
+   // Global variable for share image theme (separate from main site)
+   let shareIsDark = localStorage.getItem("shareTheme") === "dark";
+   let currentShareDataURL = "";
+   
+   // Helper: capture the #shareableSection as a PNG using an optional forced theme
+   async function captureShareImage(isDarkMode = false) {
+     const shareSection = document.getElementById("shareableSection");
+     
+     // Remove any previous forced theme classes.
+     shareSection.classList.remove("share-dark", "force-light");
+     if (isDarkMode) {
+       shareSection.classList.add("share-dark");
+     } else {
+       shareSection.classList.add("force-light");
+     }
+   
+     // Replicate header and results markup.
+     const correctVal = quiz.correct_answer_value;
+     const incorrectVal = quiz.incorrect_answer_value;
+     const exportHeaderHTML = `
+       <div class="header">
+         <div class="title" style="margin-left: 10px;">Quiz Tracker</div>
+         <div class="header-right">
+           <div class="value-tiles">
+             <div class="value-tile correct">+${correctVal}</div>
+             <div class="value-tile incorrect">${incorrectVal}</div>
+           </div>
+         </div>
+       </div>
+     `;
+     const resultsHTML = document.getElementById("results").outerHTML;
+   
+     shareSection.innerHTML = exportHeaderHTML + resultsHTML;
+     shareSection.classList.remove("hidden");
+     // Force width offscreen so it does not affect layout.
+     shareSection.style.width = "600px";
+   
+     const canvas = await html2canvas(shareSection, { scale: 2 });
+     const dataURL = canvas.toDataURL("image/png");
+   
+     // Cleanup: hide section, reset width and remove forced classes.
+     shareSection.classList.add("hidden");
+     shareSection.style.width = "";
+     shareSection.classList.remove("share-dark", "force-light");
+     return dataURL;
+   }
+   
+   // 1) Show the share modal with the captured image.
+   // Set the share toggle based on shareIsDark.
+   document.getElementById("shareButton").addEventListener("click", async () => {
+     const shareToggle = document.getElementById("toggleShareThemeSwitch");
+     shareToggle.checked = shareIsDark;
+     currentShareDataURL = await captureShareImage(shareIsDark);
+     document.getElementById("sharePreview").src = currentShareDataURL;
+     document.getElementById("shareModal").classList.remove("hidden");
+   });
+   
+   // 2) Toggle the share image theme using the neumorphic toggle switch.
+   // This only affects the share image.
+   const toggleSwitch = document.getElementById("toggleShareThemeSwitch");
+   toggleSwitch.addEventListener("change", async () => {
+     shareIsDark = toggleSwitch.checked;
+     localStorage.setItem("shareTheme", shareIsDark ? "dark" : "light");
+     currentShareDataURL = await captureShareImage(shareIsDark);
+     document.getElementById("sharePreview").src = currentShareDataURL;
+   });
+   
+   // 3) Native share button
+   document.getElementById("nativeShareBtn").addEventListener("click", async () => {
+     if (!navigator.canShare || !navigator.canShare({ files: [] })) {
+       alert("Sorry, your browser doesn't support the Web Share API for images.");
+       return;
+     }
+     try {
+       const res = await fetch(currentShareDataURL);
+       const blob = await res.blob();
+       const file = new File([blob], "quiz-share.png", { type: "image/png" });
+       await navigator.share({
+         text: "Check out my Quiz Tracker results!",
+         files: [file]
+       });
+     } catch (err) {
+       console.error("Sharing failed:", err);
+     }
+   });
+   
+   // 4) Download button
+   document.getElementById("downloadShareBtn").addEventListener("click", () => {
+     if (!currentShareDataURL) return;
+     const link = document.createElement("a");
+     link.download = "quiz-share.png";
+     link.href = currentShareDataURL;
+     link.click();
+   });
+   
+   // 5) Close the share modal
+   document.getElementById("closeShareModal").addEventListener("click", () => {
+     document.getElementById("shareModal").classList.add("hidden");
+   });

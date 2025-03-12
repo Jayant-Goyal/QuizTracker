@@ -17,6 +17,8 @@
   />
   <!-- External CSS File -->
   <link rel="stylesheet" href="styles.css" />
+  <!-- html2canvas library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
   <div class="quiz-tracker" id="quizTracker">
@@ -58,26 +60,30 @@
       </button>
     </div>
 
-    <!-- Control panel buttons (Undo removed from here) -->
+    <!-- Control panel buttons -->
     <div class="control-panel" id="controlPanel">
-      <button class="control-btn" id="answerMenuButton">
+      <button class="control-btn" id="answerMenuButton" title="Toggle Answer Canal">
         <i class="material-icons">menu</i>
       </button>
-      <button class="control-btn" id="fullScreen">
+      <button class="control-btn" id="fullScreen" title="Toggle Fullscreen">
         <i class="material-icons">fullscreen</i>
       </button>
-      <button class="control-btn" id="historyButton">
+      <button class="control-btn" id="historyButton" title="Show History">
         <i class="material-icons">history</i>
       </button>
-      <button class="control-btn" id="resetButton">
+      <button class="control-btn" id="resetButton" title="Save & Reset Quiz">
         <i class="material-icons">refresh</i>
       </button>
-      <button class="control-btn" id="settingsButton">
+      <button class="control-btn" id="settingsButton" title="Settings">
         <i class="material-icons">settings</i>
       </button>
-      <!-- Dark Mode Toggle (optional) -->
-      <button class="control-btn" id="themeToggle">
+      <!-- Dark Mode Toggle (affects whole website) -->
+      <button class="control-btn" id="themeToggle" title="Toggle Dark Mode">
         <i class="material-icons">brightness_6</i>
+      </button>
+      <!-- NEW: Share Button -->
+      <button class="control-btn" id="shareButton" title="Share Quiz">
+        <i class="material-icons">share</i>
       </button>
     </div>
 
@@ -91,7 +97,7 @@
       </div>
     </div>
 
-    <!-- Full Answer Menu Modal (STARTS HIDDEN) -->
+    <!-- Full Answer Menu Panel (STARTS HIDDEN) -->
     <div id="fullAnswerMenu" class="hidden">
       <div id="fullAnswerContent"></div>
       <button id="closeFullAnswer">Close</button>
@@ -118,16 +124,34 @@
       </div>
     </div>
 
+    <!-- "Resume Quiz" Modal (Floating) -->
+    <div id="resumeQuizModal" class="hidden">
+      <h3>Unsaved Quiz Session</h3>
+      <p>You have an unsaved quiz session. What would you like to do?</p>
+      <div class="resume-buttons">
+        <button id="resumeQuizYes">Resume Quiz</button>
+        <button id="resumeQuizNo">Discard Quiz</button>
+        <button id="resumeQuizSave">Save & Start New</button>
+      </div>
+    </div>
+
     <!-- History Modal (STARTS HIDDEN) -->
     <div id="historyMenu" class="hidden">
       <div class="historyModalHeader">
         <h2>Quiz History</h2>
-        <button id="closeHistory">Close</button>
+        <div class="history-header-buttons">
+          <!-- NEW: Delete Selected Button with circular trash icon -->
+          <button id="deleteSelectedBtn" class="history-delete-btn">
+            <i class="material-icons">delete</i>
+          </button>
+          <button id="closeHistory">Close</button>
+        </div>
       </div>
       <div class="historyTableWrapper">
         <table class="results-table">
           <thead>
             <tr>
+              <th>Select</th>
               <th>Quiz #</th>
               <th>Date/Time</th>
               <th>Attempted</th>
@@ -138,12 +162,38 @@
               <th>Max Marks</th>
               <th>%</th>
               <th>Nonnegative %</th>
+              <th>View Answers</th>
             </tr>
           </thead>
           <tbody id="historyTbody"></tbody>
         </table>
       </div>
     </div>
+  </div>
+
+  <!-- Hidden Shareable Section (for generating the image) -->
+  <div id="shareableSection" class="hidden"></div>
+
+  <!-- NEW: Share Modal -->
+  <div id="shareModal" class="hidden">
+    <div class="shareModalContent">
+      <img id="sharePreview" alt="Quiz Share Preview" />
+      <div class="shareModalButtons">
+        <!-- Neumorphic Toggle Switch for share image theme -->
+        <label class="switch" title="Toggle Share Image Dark Mode">
+          <input type="checkbox" id="toggleShareThemeSwitch">
+          <span class="slider"></span>
+        </label>
+        <!-- Icon buttons -->
+        <button id="nativeShareBtn" class="icon-btn" title="Share Quiz">
+          <i class="material-icons">share</i>
+        </button>
+        <button id="downloadShareBtn" class="icon-btn" title="Download Quiz">
+          <i class="material-icons">file_download</i>
+        </button>
+      </div>
+    </div>
+    <button id="closeShareModal" class="closeShareModalBtn">Close</button>
   </div>
 
   <!-- External JavaScript File -->
